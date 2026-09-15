@@ -1,3 +1,5 @@
+
+
 name: Build Offline Android APK
 
 on:
@@ -13,34 +15,34 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Capacitor Android App
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build Standalone Capacitor Project
         run: |
           mkdir -p www
           if [ -f index.html ]; then cp index.html www/; else echo "<html><body><h1>3D Calendar</h1></body></html>" > www/index.html; fi
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "3D Calendar" "com.meraj.calendar" --web-dir www
+          npm install @capacitor/core@5.7.0 @capacitor/cli@5.7.0 @capacitor/android@5.7.0
+          npx cap init "3D Calendar" "com.meraj.calendar" --web-dir www --no-link
           npx cap add android
           npx cap copy android
+
+      - name: Assemble Android APK
+        run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: 3D-Calendar-Offline-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
 
