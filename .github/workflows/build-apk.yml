@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -24,7 +24,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Create Web Directory and Capacitor Project
+      - name: Build Capacitor Android App
         run: |
           mkdir -p www
           if [ -f index.html ]; then cp index.html www/; else echo "<html><body><h1>3D Calendar</h1></body></html>" > www/index.html; fi
@@ -33,16 +33,14 @@ jobs:
           npx cap init "3D Calendar" "com.meraj.calendar" --web-dir www
           npx cap add android
           npx cap copy android
-
-      - name: Build Android APK
-        run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: 3D-Calendar-Offline-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
 
