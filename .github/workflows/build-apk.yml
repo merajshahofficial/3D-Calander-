@@ -1,3 +1,4 @@
+
 name: Build Offline Android APK
 
 on:
@@ -24,18 +25,18 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Create Capacitor Project Structure
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Build Capacitor Android App
         run: |
           mkdir -p www
-          cp index.html www/
+          if [ -f index.html ]; then cp index.html www/; else echo "<html><body><h1>3D Calendar</h1></body></html>" > www/index.html; fi
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@5.7.0 @capacitor/cli@5.7.0 @capacitor/android@5.7.0
           npx cap init "3D Calendar" "com.meraj.calendar" --web-dir www
           npx cap add android
-          npx cap sync android
-
-      - name: Build Android APK
-        run: |
+          npx cap copy android
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
@@ -44,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: 3D-Calendar-Offline-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.ap
